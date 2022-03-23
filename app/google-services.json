@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "604067823227",
+    "project_id": "hasnail",
+    "storage_bucket": "hasnail.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604067823227:android:f4d3e80913ffd0ac0becde",
+        "android_client_info": {
+          "package_name": "kr.co.myeoungju.hasnailstudio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "604067823227-l5ucv2cugc2nrt5rk9kvr2mg39br7hde.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCM_gxD2tps9kKRWTt1VkNEcAsrEwUCsbQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "604067823227-l5ucv2cugc2nrt5rk9kvr2mg39br7hde.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

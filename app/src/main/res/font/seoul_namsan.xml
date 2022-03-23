@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <font
+        android:font="@font/seoul_namsan_b"
+        />
+    <font
+        android:font="@font/seoul_namsan_eb"
+        />
+    <font
+        android:font="@font/seoul_namsan_l"
+        />
+    <font
+        android:font="@font/seoul_namsan_m"
+        />
+    <font
+        android:font="@font/seoul_namsan_vert"
+        />
+</font-family>
