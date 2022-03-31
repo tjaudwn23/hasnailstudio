@@ -33,6 +33,7 @@ class AcceptTheTermsActivity : AppCompatActivity() {
     }
 
     fun bind(){
+
         next_btn.setOnClickListener {
             val cp = CreatePDF()
             cp.LoadBitmap(scrollview_linear,scrollview_linear.width,scrollview_linear.height)

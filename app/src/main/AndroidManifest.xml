@@ -13,13 +13,23 @@
         android:theme="@style/Theme.Hasnailstudio"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name=".AcceptTheTermsActivity"
+            android:name=".SplashImage"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".AcceptTheTermsActivity"
+            android:exported="true">
         </activity>
 
         <provider

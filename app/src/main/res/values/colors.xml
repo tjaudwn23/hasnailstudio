@@ -9,7 +9,8 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="background">#E6E4EB</color>
-    <color name="checkbox">#F7CDC9</color>
+    <color name="pink">#F7CDC9</color>
     <color name="line">#646464</color>
     <color name="gray">#646464</color>
+    <color name="searchBg">#FAFAFA</color>
 </resources>
