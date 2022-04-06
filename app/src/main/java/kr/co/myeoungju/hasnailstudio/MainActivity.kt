@@ -1,5 +1,6 @@
 package kr.co.myeoungju.hasnailstudio
 
+import android.content.Intent
 import kr.co.myeoungju.hasnailstudio.helper.SwipeHelperCallback
 import android.os.Bundle
 import android.view.View
@@ -22,7 +23,31 @@ class MainActivity:AppCompatActivity() {
     }
 
     fun bind(){
+        nameBind()
+        dateBind()
+        infoBind()
 
+    }
+
+    fun nameBind(){
+        register_btn.setOnClickListener {
+            val intent = Intent(this,AcceptTheTermsActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    fun dateBind(){
+        date_back_btn.setOnClickListener {
+            con_name.visibility = View.VISIBLE
+            con_treatment.visibility = View.GONE
+            con_date.visibility = View.GONE
+        }
+    }
+
+    fun infoBind(){
+        back_btn.setOnClickListener {
+            con_treatment.visibility = View.GONE
+        }
 
     }
 

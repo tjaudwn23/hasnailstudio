@@ -11,6 +11,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.accept_the_terms_activity.*
+import kr.co.myeoungju.hasnailstudio.popup.Popup_Nomal
 import kr.co.myeoungju.hasnailstudio.utils.CreatePDF
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,9 +36,63 @@ class AcceptTheTermsActivity : AppCompatActivity() {
     fun bind(){
 
         next_btn.setOnClickListener {
-            val cp = CreatePDF()
-            cp.LoadBitmap(scrollview_linear,scrollview_linear.width,scrollview_linear.height)
+            if(checker()){
+                val cp = CreatePDF()
+                cp.LoadBitmap(scrollview_linear,scrollview_linear.width,scrollview_linear.height)
+            }
+
         }
+    }
+
+    fun  checker():Boolean {
+        val name = name_edit.text.toString()
+        val phoneNum = phoneNum_f_edit.text.toString() + phoneNum_m_edit.text.toString() + phoneNum_e_edit.text.toString()
+        val isSign = signView.mBitmap != null
+        val year = year_edit.text.toString()
+        val month = month_edit.text.toString()
+        val date = date_edit.text.toString()
+
+        if (name.equals("")){
+            val popup = Popup_Nomal(this)
+            popup.showDialog("이름을 확인해 주세요."){
+                popup.dismiss()
+            }
+            return false
+        }
+
+        if(phoneNum.length != 11){
+            val popup = Popup_Nomal(this)
+            popup.showDialog("휴대폰정보를 확인해 주세요."){
+                popup.dismiss()
+            }
+            return false
+        }
+
+        if (!isSign){
+            val popup = Popup_Nomal(this)
+            popup.showDialog("서명을 해주세요."){
+                popup.dismiss()
+            }
+            return false
+        }
+
+        if(year.equals("") || month.equals("") || date.equals("")){
+            val popup = Popup_Nomal(this)
+            popup.showDialog("날짜를 확인해 주세요."){
+                popup.dismiss()
+            }
+            return false
+        }
+
+        if((!agree_checker.isChecked && !nonagree_checker.isChecked) || (agree_checker.isChecked && nonagree_checker.isChecked)){
+            val popup = Popup_Nomal(this)
+            popup.showDialog("동의 부분을 동의해 주세요."){
+                popup.dismiss()
+            }
+            return false
+        }
+
+        return true
     }
 
     fun setTextSpan(){

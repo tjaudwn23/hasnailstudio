@@ -18,7 +18,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/con_name"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="visible">
 
             <EditText
                 android:id="@+id/search_name_textField"
@@ -73,6 +74,18 @@
             android:layout_height="match_parent"
             android:visibility="gone">
 
+            <Button
+                android:id="@+id/date_back_btn"
+                android:layout_width="15dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/ico_chevron_left"
+                android:backgroundTint="@color/pink"
+                app:layout_constraintBottom_toBottomOf="@+id/search_date_textField"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/search_date_textField" />
+
             <View
                 android:id="@+id/view4"
                 android:layout_width="1dp"
@@ -86,7 +99,7 @@
                 android:id="@+id/search_date_textField"
                 android:layout_width="300dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="20dp"
                 android:background="@drawable/search_bg"
@@ -99,7 +112,7 @@
                 android:textColorHint="@color/gray"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/view4"
+                app:layout_constraintStart_toEndOf="@+id/date_back_btn"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="TouchTargetSizeCheck" />
 
@@ -164,6 +177,19 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                <Button
+                    android:id="@+id/back_btn"
+                    android:layout_width="15dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/ico_chevron_left"
+                    android:backgroundTint="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ScrollView
