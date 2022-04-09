@@ -1,5 +1,7 @@
 package kr.co.myeoungju.hasnailstudio
 
+import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -10,16 +12,50 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.accept_the_terms_activity.*
+import kr.co.myeoungju.hasnailstudio.common.Utils
+import kr.co.myeoungju.hasnailstudio.entity.GuestInfo
 import kr.co.myeoungju.hasnailstudio.popup.Popup_Nomal
-import kr.co.myeoungju.hasnailstudio.utils.CreatePDF
+import kr.co.myeoungju.hasnailstudio.utils.LoadLayoutBitmap
 import java.text.SimpleDateFormat
 import java.util.*
+import android.util.Base64
+import android.view.View
 
 class AcceptTheTermsActivity : AppCompatActivity() {
+
+    var guestInfo:GuestInfo? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.accept_the_terms_activity)
+
+        guestInfo = intent.getParcelableExtra<GuestInfo>("guest")
+
+        if (guestInfo != null){
+            name_edit.setText(guestInfo!!.name)
+            var split = guestInfo!!.phone_num.split("-")
+            phoneNum_f_edit.setText(split[0])
+            phoneNum_m_edit.setText(split[1])
+            phoneNum_e_edit.setText(split[2])
+
+            split = guestInfo!!.birth.split("-")
+            year_edit.setText(split[0])
+            month_edit.setText(split[1])
+            date_edit.setText(split[2])
+
+            val decodedString: ByteArray = Base64.decode(guestInfo!!.sign_url, Base64.DEFAULT)
+            val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+
+            signView.visibility = View.GONE
+            sign_imgView.visibility = View.VISIBLE
+
+            sign_imgView.setImageBitmap(decodedByte)
+
+        }
+
         bind()
         attribute()
     }
@@ -37,11 +73,77 @@ class AcceptTheTermsActivity : AppCompatActivity() {
 
         next_btn.setOnClickListener {
             if(checker()){
-                val cp = CreatePDF()
-                cp.LoadBitmap(scrollview_linear,scrollview_linear.width,scrollview_linear.height)
+                setData()
+               /* val cp = CreatePDF()
+                cp.LoadBitmap(scrollview_linear,scrollview_linear.width,scrollview_linear.height)*/
             }
 
         }
+    }
+
+    fun setData() {
+
+        if(guestInfo == null){
+            val name = name_edit.text.toString()
+            val phoneNum = phoneNum_f_edit.text.toString() + "-" + phoneNum_m_edit.text.toString() + "-" + phoneNum_e_edit.text.toString()
+            val year = year_edit.text.toString()
+            val month = month_edit.text.toString()
+            val date = date_edit.text.toString()
+
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val dateString = dateFormat.format(Date())
+
+
+
+            val firestore = FirebaseFirestore.getInstance()
+
+            var param = HashMap<String, Any>()
+            param.apply {
+                put("name",name)
+                put("phone_num",phoneNum)
+                put("sign_url",Utils.BitMapToString(signView.mBitmap!!))
+                put("birth",year + "-" + month + "-" + date)
+                put("register_date",dateString)
+            }
+            guestInfo = GuestInfo()
+            guestInfo?.name = name
+            guestInfo?.phone_num = phoneNum
+            guestInfo?.sign_url = Utils.BitMapToString(signView.mBitmap!!)
+            guestInfo?.birth = year + "-" + month + "-" + date
+            guestInfo?.register_date = dateString
+
+
+
+            firestore.collection("guest")
+                .add(param)
+                .addOnSuccessListener {
+                    val popup = Popup_Nomal(this)
+
+                    guestInfo?.key = it.id
+                    gotoSurgery(guestInfo!!)
+                }.addOnFailureListener {
+                    val popup = Popup_Nomal(this)
+                    popup.showDialog("손님등록을 실패 했습니다.\n잠시후 시도해주세요."){
+                        popup.dismiss()
+                    }
+                }
+        }else{
+            gotoSurgery(guestInfo!!)
+
+        }
+
+
+    }
+
+    fun gotoSurgery(info:GuestInfo){
+        val loadLayoutBitmap = LoadLayoutBitmap()
+        val array = loadLayoutBitmap.GetBitmapByteArry(scrollview_linear,scrollview_linear.width,scrollview_linear.height)
+
+        val intent = Intent(this,SurgeryActivity::class.java)
+        intent.putExtra("guest",info)
+        intent.putExtra("byteArray",array)
+        startActivity(intent)
+        finish()
     }
 
     fun  checker():Boolean {
@@ -67,14 +169,16 @@ class AcceptTheTermsActivity : AppCompatActivity() {
             }
             return false
         }
-
-        if (!isSign){
-            val popup = Popup_Nomal(this)
-            popup.showDialog("서명을 해주세요."){
-                popup.dismiss()
+        if(guestInfo == null){
+            if (!isSign){
+                val popup = Popup_Nomal(this)
+                popup.showDialog("서명을 해주세요."){
+                    popup.dismiss()
+                }
+                return false
             }
-            return false
         }
+
 
         if(year.equals("") || month.equals("") || date.equals("")){
             val popup = Popup_Nomal(this)

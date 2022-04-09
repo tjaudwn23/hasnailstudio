@@ -6,15 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.userinfo_recyclercell.view.*
 import kr.co.myeoungju.hasnailstudio.MainActivity
 import kr.co.myeoungju.hasnailstudio.R
+import kr.co.myeoungju.hasnailstudio.entity.GuestInfo
 import java.util.*
 import kotlin.collections.ArrayList
 
 class UserInfoRecyclerAdapter(val superCon: MainActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
 
-    var lstDatas = ArrayList<String>()
+    var lstDatas = ArrayList<GuestInfo>()
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -35,11 +37,18 @@ class UserInfoRecyclerAdapter(val superCon: MainActivity) : RecyclerView.Adapter
 
     class ViewHolder(itemView: View,val superCon: MainActivity) : RecyclerView.ViewHolder(itemView){
 
-        fun initView(datas:ArrayList<String>,position: Int )
+        fun initView(datas:ArrayList<GuestInfo>,position: Int )
         {
+            val info = datas[position]
+            itemView.name_txt.text = "이름 : " + info.name
+            itemView.register_txt.text = "등록일자 : " +  info.register_date
+            itemView.phoneNum_txt.text = "휴대폰 번호 : " + info.phone_num
+            itemView.birth_txt.text = "생년월일 : " + info.birth
+
 
             itemView.setOnClickListener {
-                superCon.con_date.visibility = View.VISIBLE
+
+                superCon.getDate(info)
             }
 
         }
@@ -59,7 +68,7 @@ class UserInfoRecyclerAdapter(val superCon: MainActivity) : RecyclerView.Adapter
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data:ArrayList<String>){
+    fun setData(data:ArrayList<GuestInfo>){
         lstDatas = data
         notifyDataSetChanged()
     }

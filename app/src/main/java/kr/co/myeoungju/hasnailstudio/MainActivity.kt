@@ -3,23 +3,34 @@ package kr.co.myeoungju.hasnailstudio
 import android.content.Intent
 import kr.co.myeoungju.hasnailstudio.helper.SwipeHelperCallback
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.main_activity.*
 import kr.co.myeoungju.hasnailstudio.adapter.DateRecyclerAdapter
 import kr.co.myeoungju.hasnailstudio.adapter.UserInfoRecyclerAdapter
+import kr.co.myeoungju.hasnailstudio.common.Utils
+import kr.co.myeoungju.hasnailstudio.entity.DateInfo
+import kr.co.myeoungju.hasnailstudio.entity.GuestInfo
 import kr.co.myeoungju.hasnailstudio.helper.DateSwipeHelperCallback
 
 class MainActivity:AppCompatActivity() {
 
+
+    var guestAdapter:UserInfoRecyclerAdapter? = null
+    var dateAdapter:DateRecyclerAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         bind()
         attribute()
+
+        getGest()
     }
 
     fun bind(){
@@ -27,6 +38,51 @@ class MainActivity:AppCompatActivity() {
         dateBind()
         infoBind()
 
+    }
+
+    fun getGest(){
+        val firestore = FirebaseFirestore.getInstance()
+        val docRef = firestore.collection("guest")
+        docRef.addSnapshotListener(EventListener { value, error ->
+            if (error != null) {
+                Log.w("listener", "Listen failed.", error)
+                return@EventListener
+            }
+            val datas = ArrayList<GuestInfo>()
+            for (doc in value!!) {
+                val dn: GuestInfo = Utils.parseHashMapToObject(
+                    doc.data,
+                    GuestInfo::class.java
+                ) as GuestInfo
+                dn.key = doc.id
+                datas.add(dn)
+
+                guestAdapter?.setData(datas)
+            }
+        })
+    }
+
+    fun getDate(guestInfo:GuestInfo){
+        val firestore = FirebaseFirestore.getInstance()
+        val docRef = firestore.collection("guest").document(guestInfo.key).collection("surgery")
+        docRef.get()
+            .addOnSuccessListener {
+                val datas = ArrayList<DateInfo>()
+                for (doc in it!!) {
+                    val dn: DateInfo = Utils.parseHashMapToObject(
+                        doc.data,
+                        DateInfo::class.java
+                    ) as DateInfo
+                    dn.key = doc.id
+                    datas.add(dn)
+
+
+                }
+                con_date.visibility = View.VISIBLE
+                dateAdapter?.setData(datas,guestInfo)
+            }.addOnFailureListener {
+                Log.w("listener", "Listen failed.", it)
+            }
     }
 
     fun nameBind(){
@@ -41,6 +97,12 @@ class MainActivity:AppCompatActivity() {
             con_name.visibility = View.VISIBLE
             con_treatment.visibility = View.GONE
             con_date.visibility = View.GONE
+        }
+
+        new_btn.setOnClickListener {
+            val intent = Intent(this,AcceptTheTermsActivity::class.java)
+            intent.putExtra("guest",dateAdapter?.selectGuest)
+            startActivity(intent)
         }
     }
 
@@ -57,19 +119,13 @@ class MainActivity:AppCompatActivity() {
     }
 
     fun  setDateInfo(){
-        // 리사이클러뷰 아이템 생성
-        val items = arrayListOf("안녕 - 조이", "Je T'aime - 조이", "Day by Day - 조이", "좋을텐데(If Only)(Feat. 폴킴) - 조이",
-            "Happy Birthday To You - 조이", "그럴때마다(Be There For You) - 조이", "매일 그대와 - 아이유", "너의 의미 - 아이유",
-            "여우야 - 조이", "요즘 너 말야 - 조이", "러브레터 - 정승환")
-
         // 리사이클러뷰 어댑터 달기
-        val recyclerViewAdapter = DateRecyclerAdapter(this)
-        date_recyclerview.adapter = recyclerViewAdapter
+        dateAdapter = DateRecyclerAdapter(this)
+        date_recyclerview.adapter = dateAdapter
         date_recyclerview.layoutManager = LinearLayoutManager(this)
-        recyclerViewAdapter.setData(items)
 
         // 리사이클러뷰에 스와이프, 드래그 기능 달기
-        val swipeHelperCallback = DateSwipeHelperCallback(recyclerViewAdapter).apply {
+        val swipeHelperCallback = DateSwipeHelperCallback(dateAdapter!!).apply {
             // 스와이프한 뒤 고정시킬 위치 지정
             setClamp(resources.displayMetrics.density * 100)    // 1080 / 4 = 270
         }
@@ -86,19 +142,13 @@ class MainActivity:AppCompatActivity() {
     }
 
     fun setUserInfo(){
-        // 리사이클러뷰 아이템 생성
-        val items = arrayListOf("안녕 - 조이", "Je T'aime - 조이", "Day by Day - 조이", "좋을텐데(If Only)(Feat. 폴킴) - 조이",
-            "Happy Birthday To You - 조이", "그럴때마다(Be There For You) - 조이", "매일 그대와 - 아이유", "너의 의미 - 아이유",
-            "여우야 - 조이", "요즘 너 말야 - 조이", "러브레터 - 정승환")
-
         // 리사이클러뷰 어댑터 달기
-        val recyclerViewAdapter = UserInfoRecyclerAdapter(this)
-        name_recyclerview.adapter = recyclerViewAdapter
+        guestAdapter = UserInfoRecyclerAdapter(this)
+        name_recyclerview.adapter = guestAdapter
         name_recyclerview.layoutManager = LinearLayoutManager(this)
-        recyclerViewAdapter.setData(items)
 
         // 리사이클러뷰에 스와이프, 드래그 기능 달기
-        val swipeHelperCallback = SwipeHelperCallback(recyclerViewAdapter).apply {
+        val swipeHelperCallback = SwipeHelperCallback(guestAdapter!!).apply {
             // 스와이프한 뒤 고정시킬 위치 지정
             setClamp(resources.displayMetrics.density * 100)    // 1080 / 4 = 270
         }
