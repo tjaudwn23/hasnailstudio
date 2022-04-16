@@ -93,6 +93,8 @@ class SurgeryActivity:AppCompatActivity() {
                 val popup = Popup_Nomal(this)
                 popup.showDialog("성공했습니다!"){
                     popup.dismiss()
+                    intent.putExtra("data",guestInfo)
+                    setResult(RESULT_OK,intent)
                     finish()
                 }
             }.addOnFailureListener {

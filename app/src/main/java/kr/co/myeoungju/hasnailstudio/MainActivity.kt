@@ -5,12 +5,16 @@ import kr.co.myeoungju.hasnailstudio.helper.SwipeHelperCallback
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.accept_the_terms_activity.*
 import kotlinx.android.synthetic.main.main_activity.*
 import kr.co.myeoungju.hasnailstudio.adapter.DateRecyclerAdapter
 import kr.co.myeoungju.hasnailstudio.adapter.UserInfoRecyclerAdapter
@@ -18,19 +22,23 @@ import kr.co.myeoungju.hasnailstudio.common.Utils
 import kr.co.myeoungju.hasnailstudio.entity.DateInfo
 import kr.co.myeoungju.hasnailstudio.entity.GuestInfo
 import kr.co.myeoungju.hasnailstudio.helper.DateSwipeHelperCallback
+import kr.co.myeoungju.hasnailstudio.search.SearchActivity
 
 class MainActivity:AppCompatActivity() {
 
-
+    lateinit var activityResultLauncher:ActivityResultLauncher<Intent>
     var guestAdapter:UserInfoRecyclerAdapter? = null
     var dateAdapter:DateRecyclerAdapter? = null
+
+
+    val NAME_REQUESTCODE = 10000
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         bind()
         attribute()
 
-        getGest()
+        //getGest()
     }
 
     fun bind(){
@@ -41,7 +49,29 @@ class MainActivity:AppCompatActivity() {
     }
 
     fun getGest(){
+
+        val searchText = search_name_textField.text.toString()
+
         val firestore = FirebaseFirestore.getInstance()
+        val docRef = firestore.collection("guest")
+            .whereEqualTo("name",searchText)
+
+        docRef.get()
+            .addOnSuccessListener {
+                val datas = ArrayList<GuestInfo>()
+                for (doc in it!!) {
+                    val dn: GuestInfo = Utils.parseHashMapToObject(
+                        doc.data,
+                        GuestInfo::class.java
+                    ) as GuestInfo
+                    dn.key = doc.id
+                    datas.add(dn)
+                }
+                guestAdapter?.setData(datas)
+            }.addOnFailureListener {
+                guestAdapter?.setData(ArrayList<GuestInfo>())
+            }
+       /* val firestore = FirebaseFirestore.getInstance()
         val docRef = firestore.collection("guest")
         docRef.addSnapshotListener(EventListener { value, error ->
             if (error != null) {
@@ -59,7 +89,7 @@ class MainActivity:AppCompatActivity() {
 
                 guestAdapter?.setData(datas)
             }
-        })
+        })*/
     }
 
     fun getDate(guestInfo:GuestInfo){
@@ -85,10 +115,52 @@ class MainActivity:AppCompatActivity() {
             }
     }
 
+    fun searchDate(guestInfo:GuestInfo){
+        val searchDate = search_date_textField.text.toString()
+        val firestore = FirebaseFirestore.getInstance()
+        val docRef = firestore.collection("guest").document(guestInfo.key).collection("surgery")
+            .whereGreaterThanOrEqualTo("date",searchDate)
+        docRef.get()
+            .addOnSuccessListener {
+                val datas = ArrayList<DateInfo>()
+                for (doc in it!!) {
+                    val dn: DateInfo = Utils.parseHashMapToObject(
+                        doc.data,
+                        DateInfo::class.java
+                    ) as DateInfo
+                    dn.key = doc.id
+                    datas.add(dn)
+
+
+                }
+                con_date.visibility = View.VISIBLE
+                dateAdapter?.setData(datas,guestInfo)
+            }.addOnFailureListener {
+                Log.w("listener", "Listen failed.", it)
+            }
+    }
+
     fun nameBind(){
         register_btn.setOnClickListener {
             val intent = Intent(this,AcceptTheTermsActivity::class.java)
-            startActivity(intent)
+            activityResultLauncher.launch(intent)
+        }
+
+        search_name_textField.setOnEditorActionListener { textView, i, keyEvent ->
+            if(i == EditorInfo.IME_ACTION_SEARCH){
+                getGest()
+            }
+            true
+        }
+
+        activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            if(it.resultCode == RESULT_OK){
+                val intent = it.data
+                val data = intent!!.getParcelableExtra<GuestInfo>("data") ?: GuestInfo()
+                search_name_textField.setText(data.name)
+                getGest()
+
+            }
         }
     }
 
@@ -103,6 +175,13 @@ class MainActivity:AppCompatActivity() {
             val intent = Intent(this,AcceptTheTermsActivity::class.java)
             intent.putExtra("guest",dateAdapter?.selectGuest)
             startActivity(intent)
+        }
+
+        search_date_textField.setOnEditorActionListener { textView, i, keyEvent ->
+            if(i == EditorInfo.IME_ACTION_SEARCH){
+                searchDate(dateAdapter!!.selectGuest)
+            }
+            true
         }
     }
 

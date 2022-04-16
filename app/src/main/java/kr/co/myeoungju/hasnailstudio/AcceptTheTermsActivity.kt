@@ -22,11 +22,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.util.Base64
 import android.view.View
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.android.synthetic.main.main_activity.*
 
 class AcceptTheTermsActivity : AppCompatActivity() {
 
     var guestInfo:GuestInfo? = null
-
+    lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +81,18 @@ class AcceptTheTermsActivity : AppCompatActivity() {
                 cp.LoadBitmap(scrollview_linear,scrollview_linear.width,scrollview_linear.height)*/
             }
 
+        }
+
+        activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            if(it.resultCode == RESULT_OK){
+                val intent = it.data
+                val data = intent!!.getParcelableExtra<GuestInfo>("data") ?: GuestInfo()
+                intent.putExtra("data",data)
+                setResult(RESULT_OK,intent)
+                finish()
+            }else{
+                finish()
+            }
         }
     }
 
@@ -142,8 +157,8 @@ class AcceptTheTermsActivity : AppCompatActivity() {
         val intent = Intent(this,SurgeryActivity::class.java)
         intent.putExtra("guest",info)
         intent.putExtra("byteArray",array)
-        startActivity(intent)
-        finish()
+        activityResultLauncher.launch(intent)
+
     }
 
     fun  checker():Boolean {
